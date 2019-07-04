@@ -1,20 +1,13 @@
 #!/usr/bin/env python2
-# -*- encoding: utf-8 -*-
 
-import time
 import slacker
-import os
-from slackbot.bot import Bot, respond_to, default_reply
+from slackbot.bot import Bot, respond_to
 import cv2
 import tempfile
-import signal
-import slackbot_settings
 
-channel_id = u'raspberrypi_channel'
-threads = {}
-
-oldest = unicode(time.time()-120)
-slacker = slacker.Slacker(slackbot_settings.API_TOKEN)
+API_TOKEN = 'xoxb-69238482533-673339797603-jDCz43S3UOiSoI573jNH3sVU'
+DEFAULT_CHANNEL = u'raspberrypi_channel'
+slacker = slacker.Slacker(API_TOKEN)
 
 def get_username(message):
     if 'user' in message:
@@ -24,16 +17,14 @@ def get_username(message):
     elif 'username' in message:
         return message['username']
 
-def post_slack_message(text, channel=channel_id):
+def post_slack_message(text, channel=DEFAULT_CHANNEL):
     slacker.chat.post_message(channel=channel, text=text, as_user=True)
 
-#@respond_to('pan_camera (.*)')
-#def pan_camera(message, arg):
-#    pass
-
-#@respond_to('tilt_camera (.*)')
-#def pan_camera(message, arg):
-#    pass
+@respond_to('hello')
+def hello(message):
+    username = get_username(message)
+    channel = message.body['channel']
+    post_slack_message('Hello, {}!'.format(username), channel=channel)
 
 @respond_to('photo')
 def photo(message):
@@ -51,15 +42,6 @@ def photo(message):
             post_slack_message('Could not convert the picture ;(', channel=message.body['channel'])
             return
         slacker.files.upload(tf.name, channels=message.body['channel'])
-
-def sigint_handler(signum, frame):
-    #rospy.signal_shutdown('Manual shutdown')
-    time.sleep(1)
-    quit()
-signal.signal(signal.SIGINT, sigint_handler)
-
-#rospy.init_node('slack_message')
-#rospy.on_shutdown(lambda: os._exit(0))
 
 bot = Bot()
 bot.run()
