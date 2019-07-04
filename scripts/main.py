@@ -45,7 +45,7 @@ def photo(message):
     with tempfile.NamedTemporaryFile(suffix='.jpg', delete=True) as tf:
         print ('Writing jpeg file '+tf.name+'.')
         try:
-            cv2.imwrite(tf.name, cv2_img)
+            cv2.imwrite(tf.name, frame)
         except Exception as e:
             print (e)
             post_slack_message('Could not convert the picture ;(', channel=message.body['channel'])
