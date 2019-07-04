@@ -1,6 +1,7 @@
 #!/usr/bin/env python2
 # -*- encoding: utf-8 -*-
 
+import rospy
 import time
 import slacker
 import os
@@ -43,17 +44,17 @@ def photo(message):
     if frame is None:
         post_slack_message('Could not take a picture ;(', channel=message.body['channel'])
     with tempfile.NamedTemporaryFile(suffix='.jpg', delete=True) as tf:
-        print ('Writing jpeg file '+tf.name+'.')
+        rospy.loginfo('Writing jpeg file '+tf.name+'.')
         try:
             cv2.imwrite(tf.name, cv2_img)
         except Exception as e:
-            print (e)
+            rospy.logerr(e)
             post_slack_message('Could not convert the picture ;(', channel=message.body['channel'])
             return
         slacker.files.upload(tf.name, channels=message.body['channel'])
 
 def sigint_handler(signum, frame):
-    #rospy.signal_shutdown('Manual shutdown')
+    rospy.signal_shutdown('Manual shutdown')
     time.sleep(1)
     quit()
 signal.signal(signal.SIGINT, sigint_handler)
