@@ -2,10 +2,10 @@
 
 import slacker
 from slackbot.bot import Bot, respond_to
+from slackbot_settings import API_TOKEN
 import cv2
 import tempfile
 
-API_TOKEN = 'xoxb-69238482533-673339797603-jDCz43S3UOiSoI573jNH3sVU'
 DEFAULT_CHANNEL = u'raspberrypi_channel'
 slacker = slacker.Slacker(API_TOKEN)
 
