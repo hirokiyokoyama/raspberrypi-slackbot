@@ -10,12 +10,12 @@ DEFAULT_CHANNEL = u'raspberrypi_channel'
 slacker = slacker.Slacker(API_TOKEN)
 
 def get_username(message):
-    if 'user' in message:
-        res1 = slacker.users.info(message['user']).body
+    if 'user' in message.body:
+        res1 = slacker.users.info(message.body['user']).body
         if res1['ok']:
             return res1['user']['name']
-    elif 'username' in message:
-        return message['username']
+    elif 'username' in message.body:
+        return message.body['username']
 
 def post_slack_message(text, channel=DEFAULT_CHANNEL):
     slacker.chat.post_message(channel=channel, text=text, as_user=True)
