@@ -35,9 +35,13 @@ def hello(message):
 @respond_to('photo')
 def photo(message):
     try:
+        # discard old frames from the buffer
+        for _ in range(5):
+            video_capture.grab()
         ret, frame = video_capture.read()
-        post_image(channel=message.body['channel'])
-    except:
+        post_image(frame, channel=message.body['channel'])
+    except Exception as e:
+        print e
         post_text('Could not take a picture ;(', channel=message.body['channel'])
 
 bot = Bot()
