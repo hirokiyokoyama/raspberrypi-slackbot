@@ -8,6 +8,7 @@ import tempfile
 
 DEFAULT_CHANNEL = u'raspberrypi_channel'
 slacker = slacker.Slacker(API_TOKEN)
+video_capture = cv2.VideoCapture(0)
 
 def get_username(message):
     if 'user' in message.body:
@@ -17,31 +18,27 @@ def get_username(message):
     elif 'username' in message.body:
         return message.body['username']
 
-def post_slack_message(text, channel=DEFAULT_CHANNEL):
+def post_text(text, channel=DEFAULT_CHANNEL):
     slacker.chat.post_message(channel=channel, text=text, as_user=True)
+
+def post_image(image, channel=DEFAULT_CHANNEL):
+    with tempfile.NamedTemporaryFile(suffix='.jpg', delete=True) as f:
+        cv2.imwrite(f.name, image)
+        slacker.files.upload(f.name, channels=channel)
 
 @respond_to('hello')
 def hello(message):
     username = get_username(message)
     channel = message.body['channel']
-    post_slack_message('Hello, {}!'.format(username), channel=channel)
+    post_text('Hello, {}!'.format(username), channel=channel)
 
 @respond_to('photo')
 def photo(message):
-    cap = cv2.VideoCapture(0)
-    ret, frame = cap.read()
-    
-    if frame is None:
-        post_slack_message('Could not take a picture ;(', channel=message.body['channel'])
-    with tempfile.NamedTemporaryFile(suffix='.jpg', delete=True) as tf:
-        print ('Writing jpeg file '+tf.name+'.')
-        try:
-            cv2.imwrite(tf.name, frame)
-        except Exception as e:
-            print (e)
-            post_slack_message('Could not convert the picture ;(', channel=message.body['channel'])
-            return
-        slacker.files.upload(tf.name, channels=message.body['channel'])
+    try:
+        ret, frame = video_capture.read()
+        post_image(channel=message.body['channel'])
+    except:
+        post_text('Could not take a picture ;(', channel=message.body['channel'])
 
 bot = Bot()
 bot.run()
